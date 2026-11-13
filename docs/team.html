@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "De-_mAXETOZ", "tracker": "Tea Shop 竞对", "competitor": "tenyeetea", "caption": "66 days left in 2026 🍵\n\nAs the year draws to a close, perhaps we could all use a little less worry, a little more patience, and something to look forward to.\n\n岁末将至，愿我们少些烦忧，多些从容。\n慢品一盏茶，也给未来留一份期待。\n\n#TenYeeTea #TeaAndLife #SlowLiving \n#天一茗茶 #未来可期", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 倒计时焦虑 → 治愈寄语 → 茶饮生活方式引导\n为什么火: 踩中岁末焦虑情绪，用“慢品茶”提供情绪价值与生活松弛感。\n改编角度: 结合华人年终总结心境，用一杯茶的时间开启年末自我犒赏。", "my": "今年还剩下最后 66 天，感觉身边越来越多年轻人开始有兴趣去认识茶🍵。\n很多人以为开始喝茶是一件很繁琐的事，需要准备很多昂贵的茶具，还要懂很深奥的茶艺。\n其实喝茶并没有那么复杂，反而变成了一种越来越多人愿意尝试的生活方式🧘🏻‍♀️。\n今天分享 3 个适合新手日常喝茶的小方法，让你在忙碌的生活里，偶尔放慢一点脚步🐌。\n第一个方法是选择适合日常的茶类。我们会推荐普洱熟茶，相比起其他茶类会更温和，脾胃偏弱的人也可以饮用。每天泡上一杯，口感醇香，陈香明显。熟茶为全发酵茶，茶性温和，具有养胃护胃、帮助肠胃蠕动消化、祛湿、降脂刮油、有助于心血管健康、安神助眠等功效。这样不仅能暖胃，还能让身体感觉更轻松。\n第二个方法是尝试日晒白茶。白茶富含茶多酚、维生素C和E，是天然抗氧化剂。入口蜜韵回甘，带有清甜花果香。以传统日晒工艺晾干，对比普通的白茶更为温和，含有更丰富的内涵物质。具有抗氧化及增强免疫力等功效。每天喝一杯，给身体补充天然的抗氧化成分。\n第三个方法是给自己准备一小段安静的品茶时间。店里的茶叶，几乎都是自己一路把关，从源头找毛料，到后面的压制成品，每一个环节都会亲自确认🚪。自己喝的安心的茶，才会放心推荐给客人。你可以选择经典极品普洱熟茶，价格是 RM168，或者日晒白茶，价格是 RM120。\n以前总觉得喝茶是上了年纪才会做的事，买茶也不知道该从哪里开始了解，常常觉得无从下手。\n后来慢慢懂得了茶的温和与陪伴，每天下午抽出一点时间，静静坐下来喝一杯茶，找回生活里的平静。\n如果你也想开始了解茶，对茶和身体健康感兴趣，可以私信我们，或者直接到店里来坐坐，找个安静的午后慢慢喝杯茶🫖。", "tags": "TenYeeTea, TeaAndLife, SlowLiving, 天一茗茶, 未来可期", "bait": false, "type": "Carousel", "likes": 30, "comments": 0, "er": 1.58, "followers": 1901, "date": "2026-10-27", "url": "https://www.instagram.com/p/De-_mAXETOZ/", "video": false, "ratio": 0, "score": 1.58, "status": "未处理", "x": 1.2}, {"id": "DddUfRPxxTD", "tracker": "Tea Shop 竞对", "competitor": "tenyeetea", "caption": "TEAPOT IN THE MAKING\n【一壶一窑】\n\nAfter shaping, each Yixing teapot is sent to the Dragon Kiln for traditional wood firing…\n\nFrom loading the kiln to firing and unloading, the entire process takes approximately 6–7 days. The varying temperatures and placement within the kiln give each teapot its own unique colour and firing marks.\n\nEvery piece carries its own story from the kiln.\n\n紫砂壶完成制作后，送往前墅古龙窑装窑烧制。\n\n从装窑、烧制到出窑，整个过程约需 6–7天。窑火温度与窑内位置的变化，也赋予每一把壶独特的窑色与火痕。\n\n每一次出窑，都是窑火与茶器之间的一次相遇。", "transcript": "So I stick em up, arms up in the skies, rainin' liquor drops, music makin' limbo's in my paper cups, and all we do is fly, fly, fly, fly, so we stick em up, cotton candy clouds that we trippin' up.", "brk": "Hook类型: 视觉奇观\n结构: 传统工艺展示 → 龙窑烧制过程 → 独特成品呈现\n为什么火: ASMR式的传统手工艺制作过程展现，满足了观众对匠人文化的好奇与治愈感\n改编角度: 拍摄茶汤冲泡紫砂壶的全过程，结合茶叶在壶中的舒展特写增加感官诱惑", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶。\n大家以为喝茶是一件很复杂的事，需要懂很多茶艺，或者要买很贵的茶具。\n其实喝茶没那么难，也不用刻意去追求什么网红风。\n想要开始喝茶，其实可以从选对一壶温和的茶开始。\n第一步，先从温和的普洱熟茶开始试起。\n相比起其他茶类，熟茶会更温和一些。\n发酵过程中产生的物质，有助于调节血脂，对心血管健康都有帮助。\n熟茶的口感醇香，陈香明显，脾胃偏弱的人也可以饮用。\n第二步，在忙碌的生活里放慢一点脚步。\n不需要去追赶什么市场流行，也不用一味追求所谓的爆款。\n找一个安静的午后，给自己泡上一杯茶，感受一下传统美学。\n第三步，选择自己喝的安心的茶。\n自己喝的安心的茶，才会放心推荐给客人。\n健康可以是一种生活方式，喝茶也可以很年轻。\n以前大家总觉得，喝茶是上了年纪才会做的事，买茶也不知道该从哪里开始了解。\n现在慢慢发现，只要选对了适合自己的茶，喝茶也可以变成一种很自然的生活方式。\n如果你也想开始喝茶，却不知道该怎么选择。\n可以私信我们，了解更多适合你的茶。\n先好好吃饭，再好好喝茶。", "tags": "", "bait": false, "type": "Video", "likes": 26, "comments": 0, "er": 1.37, "followers": 1901, "date": "2026-09-19", "url": "https://www.instagram.com/p/DddUfRPxxTD/", "video": true, "ratio": 0, "score": 1.37, "status": "未处理", "x": 1.0}, {"id": "Detu5y3JpiO", "tracker": "Tea Shop 竞对", "competitor": "tenyeetea", "caption": "沉痛悼念｜邹炳良老先生\n\n惊闻中国普洱茶界泰斗、老同志品牌创始人之一邹炳良老先生辞世，天一茗茶深感哀痛。\n\n邹老先生一生深耕茶业，以匠心制茶，以岁月沉淀经典，为中国普洱茶的发展留下了深远的影响。\n\n茶承岁月，匠心长存。谨向邹炳良老先生致以深切的哀悼与崇高的敬意。\n\n愿邹老先生安息，风范长存。并向邹老先生的家属及老同志全体同仁致以诚挚慰问。\n\n天一茗茶 谨挽\n\n——\n\nIn Memoriam | Mr. Zou Bingliang (邹炳良老先生）\n\nIt is with profound sorrow that Ten Yee Tea mourns the passing of Mr. Zou Bingliang, a revered master of Chinese Pu’er tea and co-founder of Haiwan Tea Industry, the company behind the renowned LAOTONGZHI (老同志) brand.\n\nThroughout his distinguished life, Mr. Zou devoted himself to the art and science of tea-making, upholding the highest standards of craftsmanship and quality. His dedication and profound contributions have left an enduring mark on the development of China’s Pu’er tea industry, and his legacy will continue to inspire generations of tea practitioners.\n\nThough time passes, true craftsmanship endures. The wisdom, integrity and dedication Mr. Zou embodied will remain an enduring part of China’s tea heritage.\n\nTen Yee Tea extends its deepest condolences ", "transcript": "", "brk": "Hook类型: 行业巨匠逝世/身份共鸣\n结构: 沉痛悼念泰斗 → 回顾一生匠心成就 → 表达崇高敬意与哀思\n为什么火: 击中茶行业从业者与核心茶客的情感共鸣，具有高行业权威性\n改编角度: 盘点普洱茶泰斗生前经典名作或分享一款大师级茶品的品饮纪念视频", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶。\n很多人以为，喝茶是一件很复杂、很严肃，甚至只有长辈才会去做的事。\n其实，喝茶不一定需要懂很多茶艺，反而可以很简单地融入每一天的生活里。\n今天就来分享三个，新手开始喝茶的轻松方法。\n第一个方法，从选择一款温和的熟茶开始。相比起其他茶类，普洱熟茶的茶性会更温和一些，脾胃偏弱的人也可以饮用，日常喝起来肠胃比较没有负担。\n第二个方法，给自己留出一个安静的午后。不用特意去赶什么潮流，也不用追求所谓的网红打卡风，就像我们在马六甲经营了22年的茶馆一样，找一个木质空间，慢慢坐下来喝杯茶。\n第三个方法，把健康变成一种生活方式。像我们店里主推的经典极品普洱熟茶，售价是RM168，发酵过程中产生的茶褐素和茶多糖等成分，对心血管健康都有帮助。\n以前很多人总觉得，喝茶需要懂得很多专业的茶知识，或者要买很昂贵的茶具才行。\n现在慢慢发现，只要选对适合自己体质的茶，比如从温和的普洱熟茶开始，喝茶其实可以很轻松、很年轻。\n如果你也想开始了解茶，或者不知道自己适合哪一种茶，欢迎随时私信我们，跟我们聊聊你的需求。\n自己喝的安心的茶，才会放心推荐给客人。", "tags": "", "bait": false, "type": "Image", "likes": 25, "comments": 0, "er": 1.32, "followers": 1901, "date": "2026-10-20", "url": "https://www.instagram.com/p/Detu5y3JpiO/", "video": false, "ratio": 0, "score": 1.32, "status": "未处理", "x": 1.0}, {"id": "DfMdxiLJrAn", "tracker": "Tea Shop 竞对", "competitor": "leaflohas", "caption": "11.1｜十一年，故事还在继续。🍃\n\n十一年前的今天，老葉的兒子正式开始营业。\n\n从最初的一个想法，到后来的茶空间，再到今天的 17 院，我们一路走来，经历了不同的阶段，也遇见了许多值得珍惜的人。\n\n十一年，说长不长，说短也不短。\n\n回头看，我们最珍惜的，不只是走过了多少年，而是这些年来，依然可以做着自己喜欢的事——泡一壶茶，准备一些茶点，让走进这里的人，能够暂时放下忙碌，好好享受一段属于自己的时光。\n\n今年，我们也为自己写了一首主题曲。\n\n《慢一点，生活很美》\n\n它写的是阳光落在窗边、水刚好沸了、喜欢的茶杯，还有那些不必赶时间的午后。\n\n也是我们一直相信的生活方式：\n\n不必把每一件事都做得很快，也不必把每一天过得很满。\n\n有时候，一杯茶、一个舒服的空间、三两好友的相聚，就已经很好。\n\n依依不捨 · An Encore to Our First Decade\n\n这是我们今年十一周年的主题。\n\n不舍的，是这些年累积的情谊与回忆；期待的，是接下来还有许多值得一起经历的时光。\n\n这个月和下个月，我们也会陆续安排一些小型活动、茶聚与茶课。\n\n没有大型庆典，只想继续用我们喜欢的方式，以茶相聚，分享生活。\n\n谢谢每一位曾经来过、坐下来喝过一杯茶，也一路支持着我们的朋友。\n\n十一年，是一个里程碑，也是另一个故事的开始。\n\n接下来的日子，期待在 17 院，再与你相遇。\n\n🎵 《慢一点，生活很美》\n\n慢一点，生活很美。\n\n🍃 Leaf Lohas Lifestyle Store\n老葉的兒子｜17 院\n\n#老葉的児子 #leaflohas #17院 #11週年紀念日❤️ #依依不捨", "transcript": "也可以過得很美", "brk": "Hook类型: 身份共鸣\n结构: 品牌周年回顾 → 传递慢生活理念 → 预告主题活动与邀约\n为什么火: 用十一年的长情陪伴和治愈系生活哲学，深度链接了追求松弛感的都市目标受众。\n改编角度: 结合Tea Shop场景，突出“忙碌日常中偷得浮生半日闲”的喝茶仪式感进行切入。", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶。\n\n很多人以为，喝茶是一件很麻烦的事情，需要懂很多复杂的茶艺，还要买很贵的茶具。\n\n其实喝茶不用那么有压力，也不需要追赶什么潮流。\n\n我们只要给自己泡一壶茶，就能在忙碌的生活里，慢慢找回属于自己的节奏。\n\n今天分享三个很适合新手的喝茶小习惯。\n\n第一个习惯是选择温和的茶。像我们店里主推的经典极品普洱熟茶，口感醇香，陈香明显。它是全发酵茶，茶性很温和，脾胃偏弱的人也可以饮用，平时喝起来很舒服。\n\n第二个习惯是注意茶的成分与日常保健。熟茶在发酵过程中产生的茶褐素、茶多糖以及微量的他汀类物质，都有助于调节血脂，降低血液中的胆固醇，对心血管健康都有帮助，同时还能帮助肠胃蠕动消化、祛湿和安神助眠。\n\n第三个习惯是给自己留一段不赶时间的时间。就像我们店里的老客人，54 岁的她长期跟我们买茶，认识我们很久，也很信任我们，对我们的茶喝的习惯也放心。每次来都是下午找个安静的位置，先好好吃饭，再好好喝茶。\n\n以前大家总觉得喝茶是上了年纪才会做的事，买茶也怕买到不适合自己的。\n\n现在慢慢发现，健康可以是一种生活方式，喝茶也可以很年轻。\n\n如果你也想开始了解茶，想找一款适合自己日常喝的茶，欢迎私信我们，让我们帮你推荐适合你体质的第一款茶。", "tags": "老葉的児子, leaflohas, 17院, 11週年紀念日, 依依不捨", "bait": false, "type": "Video", "likes": 79, "comments": 1, "er": 1.14, "followers": 6987, "date": "2026-11-01", "url": "https://www.instagram.com/p/DfMdxiLJrAn/", "video": true, "ratio": 0, "score": 1.17, "status": "未处理", "x": 2.2}, {"id": "DeA1HPyAf-P", "tracker": "Tea Shop 竞对", "competitor": "purplecane_tea", "caption": "✨A gathering of tea lovers, brought together by a shared love for tea. 🍵\n\nOn 21 September, tea lovers visited Purple Cane to spend time with Ms. Xiao Hui Juan,\nsharing tea, exchanging stories, and listening to her insights on tea and life.\n\nIt all began with a cup of tea,\nbut what stayed behind was a meaningful moment of connection.\n\nDuring the gathering, tea was shared, conversations flowed,\nand our tea friends even left their signatures\nas a little keepsake to remember this special tea gathering.\n\nThank you to every tea lover who joined us,\nbringing warmth, laughter and good company to the tea table. 💜\n\nTea brings people together,\nand every tea gathering leaves a story behind.\n\n#PurpleCane #TeaLovers #TeaGathering #TeaCulture #TeaCommunity #TeaMoments #TeaLoversMalaysia", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 活动高光画面 → 名家分享片段 → 参与者签名留念\n为什么火: 精准聚集垂直茶友圈层，传递了有温度的社群归属感与文化认同。\n改编角度: 拍一期Tea Shop线下茶友会花絮，突出“一杯茶结交同频挚友”的社群氛围。", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶了。\n大家开始更注重健康，也愿意在忙碌的生活里，偶尔放慢一点脚步。\n所以喝茶这件事，好像也慢慢不再是上了年纪才会做的事，而变成了一种越来越多人愿意尝试的生活方式。\n很多人刚开始接触茶的时候，以为喝茶是一件很严肃、很讲究的事情，觉得必须要买全套复杂的茶具，或者花很多钱去上茶艺课，才能开始喝茶。\n其实真正喝茶，真的没有你想的那么复杂。\n茶不是用来打卡的摆设，而是融入我们日常生活的温和陪伴。\n不用追赶潮流，也不用追求所谓的网红爆款。\n我们只要用三个简单的方法，就能找到适合自己的茶。\n第一个方法是，先从温和的茶类开始尝试。\n相比起其他茶类，我们会推荐普洱熟茶。\n因为熟茶是全发酵茶，茶性温和，脾胃偏弱的人也可以饮用。\n熟茶在发酵过程中会产生茶褐素、茶多糖以及微量的他汀类物质。\n这些成分都有助于调节血脂，降低血液中的胆固醇，对心血管健康都有帮助。\n熟茶的口感醇香，陈香明显，平时喝一杯，还能养胃护胃、帮助肠胃蠕动消化、祛湿、降脂刮油，甚至对安神助眠也有帮助。\n我们的经典极品普洱熟茶价格是 RM168，很适合作为日常保健的第一款茶。\n第二个方法是，留意茶叶的制作工艺和源头。\n就像我们开了22年的老茶馆一样，店里的茶叶都是一路把关，从源头找毛料，到后面的压制成品，每一个环节都亲自确认。\n老板自己非常注重健康，也一直坚持一个原则：自己喝的安心的茶，才会放心推荐给客人。\n第三个方法是，选择适合自己的时间，坐下来慢慢喝。\n店里的营业时间是从午餐时间过后才开始，傍晚大约 6:30pm 左右就会准备关店，星期一则是休息日不营业。\n因为老板本身对健康饮食很讲究，几乎每天在家自己准备午餐，把健康生活贯彻到自己的日常里。\n先好好吃饭，再好好喝茶。\n以前很多客人刚开始接触茶的时候，总觉得无从下手，不知道该买哪一种，也不知道自己到底适合什么茶。\n后来了解了普洱熟茶的温和与保健功效，也懂得了看茶叶的源头和品质。\n现在每天下午都会找一个安静的时间，坐下来慢慢喝一杯茶，不仅身体感觉更舒服，心也慢慢静下来了。\n如果你也想开始喝茶，但不知道该怎么选，或者想找一款适合日常保健的茶。\n欢迎直接私信我们，让我们帮你找到属于你的那杯安心茶。\n自己喝的安心的茶，才会放心推荐给客人。", "tags": "PurpleCane, TeaLovers, TeaGathering, TeaCulture, TeaCommunity, TeaMoments, TeaLoversMalaysia", "bait": false, "type": "Carousel", "likes": 31, "comments": 0, "er": 0.57, "followers": 5436, "date": "2026-10-03", "url": "https://www.instagram.com/p/DeA1HPyAf-P/", "video": false, "ratio": 0, "score": 0.57, "status": "未处理", "x": 1.2}, {"id": "Ddldj6FCdrY", "tracker": "Tea Shop 竞对", "competitor": "leaflohas", "caption": "真的沒想到「懂」對外開放的反應這麼好 🥹\n\n謝謝已經報名的朋友，\n兩場目前都只剩下少少的名額了。\n\n如果你也一直想找機會好好認識單叢，\n這可能是最近最剛好的一次。\n\n📅 9/26（六）4:00-6:30pm\n📍 17院・老葉的兒子\n目前剩下 [2] 位⋯\n私訊我們，報名參加.\nRM178/人\n\n#懂香型這回事 #鳳凰單叢 #老葉的児子 #17院\n#leaflohas", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 感谢回馈 → 制造稀缺 → 给出价值 → 行动呼吁\n为什么火: 利用限额名额制造紧迫感，精准触达垂直茶友需求。\n改编角度: 推出Tea Shop品茶会或大师课招募，强调名额有限与稀缺体验。", "my": "真的沒想到大家想开始认识茶的反应这么好。\n\n很多新朋友以为，开始喝茶一定要懂很多专业知识，或者要买很贵的茶具。\n\n其实并不是这样，喝茶其实可以很简单。\n\n只要选对适合自己的茶，慢慢去感受就好。\n\n第一，可以先从普洱熟茶开始。\n\n相比起其他茶类，熟茶的茶性会更温和。\n\n脾胃偏弱的人也可以饮用，口感醇香，陈香明显。\n\n熟茶在发酵过程中产生的茶褐素和茶多糖。\n\n都有助于调节血脂，对心血管健康都有帮助。\n\n第二，可以试试日晒白茶。\n\n白茶富含茶多酚和维生素，是天然抗氧化剂。\n\n入口蜜韵回甘，带有清甜花果香。\n\n以传统日晒工艺晾干，茶性更为温和。\n\n第三，不用追求所谓的爆款或市场流行。\n\n自己喝的安心的茶，才会放心推荐给客人。\n\n从源头找毛料到压制成品，每一个环节都亲自确认。\n\n就像经典极品普洱熟茶，价格是 RM168。\n\n以前总觉得喝茶是上了年纪才会做的事。\n\n现在越来越多人开始注重健康，想在忙碌生活里放慢脚步。\n\n如果你也想开始了解茶，不知道该从哪一种开始。\n\n私信我们，了解更多适合你的茶。", "tags": "懂香型這回事, 鳳凰單叢, 老葉的児子, 17院, leaflohas", "bait": false, "type": "Carousel", "likes": 38, "comments": 0, "er": 0.54, "followers": 6987, "date": "2026-09-22", "url": "https://www.instagram.com/p/Ddldj6FCdrY/", "video": false, "ratio": 0, "score": 0.54, "status": "未处理", "x": 1.0}, {"id": "DdtTaDmiYwn", "tracker": "Tea Shop 竞对", "competitor": "purplecane_tea", "caption": "@kampung_ing  新村好品博览会 ｜紫藤六堡茶区\n\n一泡老六堡，喝得出先辈南来的路。\n一连三天，紫藤以茶文化伙伴身份，参与由房屋及地方政府部主催的 「新村好品博览会」。\n\n现场特别备有珍藏老六堡，邀您一同品饮。\n\n📅 9月25日至27日\n🕙 每天 10am-10pm\n📍 Pavilion Bukit Jalil 5楼 Pink Zone 展览馆\n\n紫藤等您来喝茶 🍵\n\n📣📣📣 活动号外\n\n新村好品博览会也会有第二届《您好！马来西亚》无我茶会！\n【9月26日（六）11am-12pm】\n相隔3年再度举行。大家围圈而坐，抽签入席，人人泡茶、奉茶、喝茶。茶叶、茶具及热水请自备。\n\n位子有限，报名从速。\n报名：https://forms.gle/mDZWnEqCi1Luxpka6\n询问：017-269 1200", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 展会场景引入 → 核心产品亮点（老六堡） → 活动福利与号召\n为什么火: 唤起华人对南洋历史的情感共鸣，精准触达垂直茶友群体。\n改编角度: 突出老茶的岁月故事或限时线下品鉴会，吸引本地茶客打卡。", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶。\n\n很多人以为，想开始喝茶一定要懂很多复杂的茶艺，或者要买很贵的茶具。\n\n其实喝茶没那么复杂，反而变成了一种越来越多人愿意尝试的生活方式。\n\n第一，先从温和的茶开始。我们会推荐普洱熟茶，相比起其他茶类会更温和，脾胃偏弱的人也可以饮用。熟茶在发酵过程中产生的茶褐素和茶多糖，都有助于调节血脂，对心血管健康都有帮助。\n\n第二，关注每天喝进身体里的东西。老板对茶特别执着，店里的茶叶都是自己一路把关，从源头找毛料到压制成品，每一个环节都会亲自确认。自己喝的安心的茶，才会放心推荐给客人。\n\n第三，找一个可以真正放松的地方。不用去追赶什么网红打卡点，在这里可以真正坐下来，喝杯茶、学习茶知识，感受传统美学。茶馆开了22年，反而因为时间沉淀，慢慢有了属于自己的味道。\n\n以前觉得喝茶是上了年纪才会做的事，每次想喝茶又觉得无从下手。\n\n现在懂得选择适合自己的茶，在忙碌的生活里慢慢放慢脚步，先好好吃饭，再好好喝茶。\n\n如果你也想开始了解茶，可以私信我们，了解适合你的第一款茶。", "tags": "", "bait": false, "type": "Video", "likes": 25, "comments": 0, "er": 0.46, "followers": 5436, "date": "2026-09-25", "url": "https://www.instagram.com/p/DdtTaDmiYwn/", "video": true, "ratio": 0, "score": 0.46, "status": "未处理", "x": 1.0}, {"id": "Dd2-M6GCY-n", "tracker": "Tea Shop 竞对", "competitor": "leaflohas", "caption": "🌸Shape a Flower / 捏一朵花🌸\n\n和果子练切工作坊/ 捏一朵花\nWagashi Nerikiri Workshop\n\nCo-hosted with Lil Angel × Leaf Lohas\n\n一个下午，六个位置，\n六种花型，全部由你亲手完成。\n\n煮馅、包馅、揉色、塑形，\n老师一步一步带着做，\n最后带回家的，是自己的作品和食谱。\n\nOne afternoon, six seats.\nSix flower designs, all shaped by your own hands.\nTake home your creations and the recipe.\n\n🌿 日本进口食材 ｜ Imported Japanese ingredients\n🌿 零基础也可以 ｜ Beginners welcome\n🌿 含午餐 ｜ Lunch included\n\n📅 10 Oct 2026 (Sat)｜⏰ 10am – 4pm\n📍 Leaf Lohas 17院, Cheras\n💰 RM500/pax\n🌱 仅限6位 ｜ Only 6 seats\n\nDM 我们或到 www.leaflohas.com 预约\nDM us or book at www.leaflohas.com\n\n#和菓子#捏一朵花 #lilangel  #leaflihas #生活美学", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 活动亮点 → 细节拆解 → 稀缺背书\n为什么火: 精准触达追求生活美学的高端客群，稀缺名额激发即时行动。\n改编角度: 推出Tea Shop专属的“茶与和果子美学下午茶”，强调周末慢生活体验。", "my": "很多年轻人以为喝茶是上了年纪的事，其实这几年，越来越多年轻人开始有兴趣去认识茶了。\n\n很多人以为开始喝茶，一定要懂得很多复杂的茶艺，或者家里要准备一整套昂贵的茶具。\n\n其实喝茶真的没有那么复杂，它慢慢变成了一种越来越多人愿意尝试的生活方式。\n\n第一，从温和的茶开始。我们会推荐普洱熟茶，相比起其他茶类会更温和，脾胃偏弱的人也可以饮用。熟茶带有独特的古朴的味道，口感醇香，陈香明显。它在发酵过程中产生的茶褐素、茶多糖以及微量的他汀类物质，都有助于调节血脂，降低血液中的胆固醇，对心血管健康都有帮助。\n\n第二，选择适合日常的茶品。店里也有日晒白茶，以传统日晒工艺晾干，入口蜜韵回甘，带有清甜花果香。白茶富含茶多酚、维生素C和E，是天然抗氧化剂，对比普通的白茶更为温和，具有抗氧化及增强免疫力等功效。\n\n第三，找到让自己放松的茶空间。不需要刻意追求网红风的打卡，而是找一个木质空间，看各种各样有审美和韵味的器物，在一个沉静、古朴的环境里真正坐下来喝杯茶。\n\n以前大家觉得喝茶是很拘束的事情，总是不知道该从哪一种茶开始了解，也担心自己买到不合适的茶叶。\n\n现在开始，你可以先了解自己每天喝进身体里的东西，选择一杯自己喝的安心的茶。\n\n如果你也想在忙碌的生活里，偶尔放慢一点脚步，感受健康的生活方式。\n\n欢迎直接私信我们了解更多，或是来看看适合你的茶。\n\n先好好吃饭，再好好喝茶。", "tags": "和菓子, 捏一朵花, lilangel, leaflihas, 生活美学", "bait": false, "type": "Carousel", "likes": 28, "comments": 0, "er": 0.4, "followers": 6987, "date": "2026-09-29", "url": "https://www.instagram.com/p/Dd2-M6GCY-n/", "video": false, "ratio": 0, "score": 0.4, "status": "未处理", "x": 0.7}, {"id": "Dd8wIrkjPMY", "tracker": "Tea Shop 竞对", "competitor": "purplecane_tea", "caption": "Think Oolong tea only has one flavour? 👀\n\nFloral, orchid, fruity, even herbal —\nOolong tea can taste surprisingly different.\n\nFrom Southern Fujian Oolong to Wuyi Rock Oolong,\ndiscover 6 Purple Cane Oolong teas, each with its own character.\n\n🍃 One tea, many flavours.\n\nWhich one would you try?\n\n#PurpleCane #紫藤 #OolongTea #ChineseTea #TeaCulture #TeaLovers #TeaTasting #TeaEducation #MalaysianTea", "transcript": "", "brk": "Hook类型: 反常识\n结构: 打破固有认知 → 展示多样产地 → 给出产品合集\n为什么火: 用乌龙茶的多变风味打破单一刻板印象，激发好奇心与探索欲\n改编角度: 盘点华人常喝的4种奇妙乌龙风味，主打“打破你对传统茶的想象”", "my": "这几年，感觉身边越来越多年轻人开始有兴趣去认识茶。\n\n大家开始更注重健康，也愿意在忙碌的生活里，偶尔放慢一点脚步。\n\n很多人以为喝茶这件事，好像只有一种古板的味道，或者只有上了年纪才会去做。\n\n其实很多时候，反而并没有那么复杂。\n\n真正耐看的东西，本来就不需要一直追赶潮流。\n\n如果你觉得茶只有一种味道，那可能是因为你还没找到适合自己的那一款。\n\n今天就来看看，怎么在日常里挑一杯适合自己的茶。\n\n第一，从脾胃开始照顾自己。\n\n我们会推荐普洱熟茶，相比起其他茶类会更温和，脾胃偏弱的人也可以饮用。\n\n熟茶在发酵过程中产生的茶褐素、茶多糖以及微量的他汀类物质，都有助于调节血脂，降低血液中的胆固醇，对心血管健康都有帮助。\n\n熟茶的口感醇香，陈香明显，平时喝可以养胃护胃、帮助肠胃蠕动消化、祛湿、降脂刮油、有助于心血管健康、安神助眠。\n\n第二，给身体找一找天然的抗氧化支持。\n\n日晒白茶富含茶多酚、维生素C和E，是天然抗氧化剂。\n\n入口蜜韵回甘，带有清甜花果香。\n\n以传统日晒工艺晾干，对比普通的白茶更为温和，含有更丰富的内涵物质，具有抗氧化及增强免疫力等功效。\n\n第三，在日常里给自己留一个安静的空间。\n\n不管选哪一种茶，更在意的是自己喝的安心的茶，才会放心推荐给客人。\n\n以前总觉得喝茶是一件很讲究、很拘束的事，买茶也总是跟着市场流行走，结果家里买了一堆不适合自己的茶。\n\n现在慢慢懂得，健康可以是一种生活方式，喝茶也可以很年轻。\n\n如果你也想开始了解茶，想找一杯自己喝的安心的茶。\n\n直接私信我们，告诉我们你想了解哪一款茶，我们来帮你推荐。", "tags": "PurpleCane, 紫藤, OolongTea, ChineseTea, TeaCulture, TeaLovers, TeaTasting, TeaEducation, MalaysianTea", "bait": false, "type": "Carousel", "likes": 18, "comments": 0, "er": 0.33, "followers": 5436, "date": "2026-10-01", "url": "https://www.instagram.com/p/Dd8wIrkjPMY/", "video": false, "ratio": 0, "score": 0.33, "status": "未处理", "x": 0.7}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://abbldoialghrmilgsrii.supabase.co';
+const ANON = 'sb_publishable_RZwT2nwJ1fCbiuM1hDQvBg_rak9x_UK';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:40 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
